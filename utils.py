@@ -112,3 +112,17 @@ def sample_slds(slds, y_init, T_total):
     emissions_smoothed = slds.smooth(states, emissions)
 
     return elbos_pred, emissions_smoothed
+
+def finite_MAP(alpha, T, observations, phi, rho):
+    '''
+    Finite time MAP estimate of the dynamics matrix according to the paper.
+    '''
+    D_s = observations.shape[1] # Student number of neurons
+    first_sum = np.zeros((D_s, D_s))
+    for t in np.arange(0, T):
+        first_sum += np.outer(observations[t]-(1-alpha)*observations[t-1], phi(observations[t-1]))
+    second_sum = np.zeros((D_s, D_s))
+    for t in np.arange(0, T):
+        second_sum += np.outer(phi(observations[t-1]), phi(observations[t-1]))
+    A_T = alpha / T * first_sum @ np.linalg.inv(second_sum * alpha**2 / T + rho * np.eye(D_s))
+    return A_T

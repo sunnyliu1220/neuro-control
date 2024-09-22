@@ -222,9 +222,9 @@ class Graphs():
                 pp.savefig(fig)
                 print ('Neurons comparison for the training set plotted in {:.2f} seconds'.format(time.perf_counter()-time_start))
                 time_start = time.perf_counter()
-        if self.eigenvals_gt is not None and self.eigenvals_pred is not None:
+        if self.eigenvals_pred is not None or self.eigenvals_gt is not None:
             fig, ax = self.plot_spectrum_comparison(self.eigenvals_gt, self.eigenvals_pred)
-            ax.set_title('Spectrum Comparison')
+            ax.set_title('Spectral Analysis')
             pp.savefig(fig)
             print ('Spectrum comparison plotted in {:.2f} seconds'.format(time.perf_counter()-time_start))
             time_start = time.perf_counter()
@@ -367,13 +367,11 @@ class Graphs():
         '''
         Compare the eignevalues of the ground truth and the prediction.
         '''
-        assert eigenvals_gt is not None
-        assert eigenvals_pred is not None
 
         # Compare the eigenvalues of the student and the teacher
         fig, ax = plt.subplots()
-        ax.scatter(np.real(eigenvals_gt), np.imag(eigenvals_gt), color='red', marker='x', label='Ground Truth', linewidths=1)
-        ax.scatter(np.real(eigenvals_pred), np.imag(eigenvals_pred), color='blue', marker='o', facecolors='none', label='Learned')
+        if eigenvals_gt is not None: ax.scatter(np.real(eigenvals_gt), np.imag(eigenvals_gt), color='red', marker='x', label='Ground Truth', linewidths=1)
+        if eigenvals_pred is not None: ax.scatter(np.real(eigenvals_pred), np.imag(eigenvals_pred), color='blue', marker='o', facecolors='none', label='Learned')
         ax.set_xlim(-1.5, 1.5)
         ax.set_ylim(-1.5, 1.5)
         ax.set_aspect('equal')
@@ -407,8 +405,8 @@ class Graphs():
         T = 30000 if r_ex is None else r_ex.shape[0]
         for i in range(n_trajs):
             r_in = r_init[i] if r_init is not None else None
-            r1 = forecast(T=T, r_in=r_in)
             if i==0:
+                r1 = forecast(T=T, r_in=r_in)
                 n = r1.shape[1]
                 rs = np.zeros((n_trajs, T, n))
             rs[i] = forecast(T=T, r_in=r_in)
